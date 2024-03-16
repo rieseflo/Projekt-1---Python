@@ -1,6 +1,6 @@
 # new terminal
 # cd spider/downloads
-# python .\mongo_import.py -c tracks -i ../file.jl -u 'mongodb+srv://rieseflo:kqt4t5*8Z7@hikrmongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
+# python .\mongo_import.py -c tracks -i ../file.jl -u 'mongodb+srv://<user>:<password>@tuttimongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
 
 import argparse
 import json
