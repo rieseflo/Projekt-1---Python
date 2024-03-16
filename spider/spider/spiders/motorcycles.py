@@ -1,6 +1,6 @@
 # crawl gpx spider, limit to 10 and store output in json line format file
 # new terminal, cd spider
-# scrapy crawl tutti -o file.jl -s CLOSESPIDER_PAGECOUNT=100
+# scrapy crawl tutti -o file.jl
 
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule
@@ -11,11 +11,11 @@ import re
 
 class MarketplaceSpider(CrawlSpider):
     name = 'tutti'
-    start_urls = ['https://www.tutti.ch/de/q/motorraeder/Ak8CrbW90b3JjeWNsZXOUwMDAwA?sorting=newest&page=1']
+    start_urls = ['https://www.tutti.ch/de/q/motorraeder/Ak8CrbW90b3JjeWNsZXOUwMDAwA?sorting=newest']
 
     rules = (
-        Rule(LinkExtractor(allow=(r"page=",))),
-        Rule(LinkExtractor(allow=(r"fahrzeuge/motorraeder",)), callback='parse_item'),
+        Rule(LinkExtractor(allow=(r'page=\d+',)), follow=True),
+        Rule(LinkExtractor(allow=(r'fahrzeuge/motorraeder',)), callback='parse_item'),
     )
 
     def parse_item(self, response):

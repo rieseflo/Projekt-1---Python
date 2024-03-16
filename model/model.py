@@ -3,7 +3,6 @@
 # python model.py -u 'mongodb+srv://<user>:<password>@tuttimongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
 
 import argparse
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sn
