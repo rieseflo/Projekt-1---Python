@@ -1,7 +1,6 @@
 # new terminal
 # cd model
-# python model.py -u 'mongodb+srv://rieseflo:kqt4t5*8Z7@hikrmongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
-
+# python model.py -u 'mongodb+srv://username:password@hikrmongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
 
 import argparse
 
