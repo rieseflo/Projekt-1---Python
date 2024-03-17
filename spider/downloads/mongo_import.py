@@ -41,21 +41,21 @@ class JsonLinesImporter:
         self.collection = collection
 
     def read_lines(self):
-        with open(self.file, encoding='UTF-8') as f:
-            batch = []
-            for line in f:
-                batch.append(json.loads(line))
-                if len(batch) == self.batch_size:
-                    yield batch
-                    batch.clear()
-            yield batch
+            with open(self.file, encoding='UTF-8') as f:
+                batch = []
+                for line in f:
+                    batch.append(json.loads(line))
+                    if len(batch) == self.batch_size:
+                        yield batch
+                        batch.clear()
+                yield batch
 
     def save_to_mongodb(self):
-        db = self.client[self.db]
-        collection = db[self.collection]
-        for idx, batch in enumerate(self.read_lines()):
-            print("inserting batch", idx)
-            collection.insert_many(self.prepare_documents(batch))
+            db = self.client[self.db]
+            collection = db[self.collection]
+            for idx, batch in enumerate(self.read_lines()):
+                print("inserting batch", idx)
+                collection.insert_many(self.prepare_documents(batch))
 
     def prepare_documents(self, batch):
         documents = []

@@ -1,5 +1,5 @@
 # new terminal, cd spider
-# scrapy crawl tutti -o file.json
+# scrapy crawl tutti -o file.jl
 
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule

@@ -1,120 +1,113 @@
 # new terminal
 # cd model
-# python model.py -u 'mongodb+srv://<user>:<password>@tuttimongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
+# python model.py -u 'mongodb+srv://<user>:<password>@tuttimongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000' -d 'tracks' -c 'tracks'
 
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sn
+import numpy as np
 from pymongo import MongoClient
 
-parser = argparse.ArgumentParser(description='Create Model')
-parser.add_argument('-u', '--uri', required=True, help="mongodb uri with username/password")
+parser = argparse.ArgumentParser(description='Import data from Azure Cosmos DB')
+parser.add_argument('-u', '--uri', required=True, help="Azure Cosmos DB connection string")
+parser.add_argument('-d', '--database', required=True, help="Database name")
+parser.add_argument('-c', '--collection', required=True, help="Collection name")
 args = parser.parse_args()
 
 mongo_uri = args.uri
-mongo_db = "tracks"
-mongo_collection = "tracks"
+mongo_db = args.database
+mongo_collection = args.collection
 
+# Connect to Azure Cosmos DB
 client = MongoClient(mongo_uri)
 db = client[mongo_db]
 collection = db[mongo_collection]
 
-# fetch a single document
-track = collection.find_one(projection={"gpx": 0, "url": 0, "bounds": 0, "name": 0})
-values = [track.values() for track in collection.find(projection={"gpx": 0, "url": 0, "bounds": 0, "name": 0})]
+# Fetch all documents from the collection
+cursor = collection.find({})
 
-# we later use track document's field names to label the columns of the dataframe
-df = pd.DataFrame(columns=track.keys(), data=values).set_index("_id")
+# Convert documents to a list of dictionaries
+data = list(cursor)
 
-df['avg_speed'] = df['length_3d']/df['moving_time']
-df['difficulty_num'] = df['difficulty'].map(lambda x: int(x[1])).astype('int32')
+# Close MongoDB connection
+client.close()
 
-# drop na values
-df.dropna()
-df = df[df['avg_speed'] < 2] # an avg of > 2m/s is probably not a hiking activity
-df = df[df['min_elevation'] > 0]
-df = df[df['length_2d'] < 100000]
+# Convert list of dictionaries to DataFrame
+df = pd.DataFrame(data)
+
+# Print the number of documents fetched
+print("Number of documents fetched:", len(df))
+
+# Drop '_id' and 'difficulty' columns from the DataFrame
+df.drop(columns=['_id', 'difficulty'], inplace=True)
+
+# Handle missing values
+df.replace('', np.nan, inplace=True)
+print(df.isnull().sum())
+# Drop rows with NaN values in 'km' and 'first_registration' columns
+df.dropna(subset=['km', 'first_registration'], inplace=True)
+print(df.isnull().sum())
+
+# Change data types
+df['price'] = df['price'].astype(float)
+df['zip'] = df['zip'].astype(int)
+df['km'] = df['km'].astype(int)
+df['first_registration'] = df['first_registration'].astype(int)
+
+# info about the DataFrame
+print(df.info())
 
 corr = df.corr(numeric_only=True)
 
 print(corr)
 sn.heatmap(corr, annot=True)
-# plt.show()
 
+# Model
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import Normalizer
 
-y = df.reset_index()['moving_time']
-x = df.reset_index()[['downhill', 'uphill', 'length_3d', 'max_elevation']]
+# Assuming 'df' is your DataFrame and 'price' is the target variable
+y = df['price']
+x = df.drop(columns=['price', 'title', 'description'])  # Dropping column to use other features as predictors
 
+# Split the data into training and testing sets
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
 
 # Baseline Linear Regression
 lr = LinearRegression()
 lr.fit(x_train, y_train)
-
 y_pred_lr = lr.predict(x_test)
-r2 = r2_score(y_test, y_pred_lr)
-mse = mean_squared_error(y_test, y_pred_lr)
+r2_lr = r2_score(y_test, y_pred_lr)
+mse_lr = mean_squared_error(y_test, y_pred_lr)
 
-# Mean Squared Error / R2
-print("r2:\t{}\nMSE: \t{}".format(r2, mse))
+print("Linear Regression:")
+print("r2:\t{}\nMSE: \t{}".format(r2_lr, mse_lr))
 
-# GradientBoostingRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.model_selection import train_test_split
-
+# Gradient Boosting Regressor
 gbr = GradientBoostingRegressor(n_estimators=50, random_state=9000)
 gbr.fit(x_train, y_train)
 y_pred_gbr = gbr.predict(x_test)
-r2 = r2_score(y_test, y_pred_gbr)
-mse = mean_squared_error(y_test, y_pred_gbr)
+r2_gbr = r2_score(y_test, y_pred_gbr)
+mse_gbr = mean_squared_error(y_test, y_pred_gbr)
 
-print("r2:\t{}\nMSE: \t{}".format(r2, mse))
-
-def din33466(uphill, downhill, distance):
-    km = distance / 1000.0
-    print(km)
-    vertical = downhill / 500.0 + uphill / 300.0
-    print(vertical)
-    horizontal = km / 4.0
-    print(horizontal)
-    return 3600.0 * (min(vertical, horizontal) / 2 + max(vertical, horizontal))
-
-def sac(uphill, distance):
-    km = distance / 1000.0
-    return 3600.0 * (uphill/400.0 + km /4.0)
+print("\nGradient Boosting Regressor:")
+print("r2:\t{}\nMSE: \t{}".format(r2_gbr, mse_gbr))
 
 print("*** DEMO ***")
-downhill = 300
-uphill = 700
-length = 10000
-max_elevation = 1200
-print("Downhill: " + str(downhill))
-print("Uphill: " + str(uphill))
-print("Length: " + str(length))
-demoinput = [[downhill,uphill,length,max_elevation]]
-demodf = pd.DataFrame(columns=['downhill', 'uphill', 'length_3d', 'max_elevation'], data=demoinput)
-demooutput = gbr.predict(demodf)
-time = demooutput[0]
+zip_code_demo = 9524
+km_demo = 16100
+first_registration_demo = 2019
 
-import datetime
+print("Zip Code: " + str(zip_code_demo))
+print("Distance (km): " + str(km_demo))
+print("First Registration Year: " + str(first_registration_demo))
 
-print("DIN: " + str(datetime.timedelta(seconds=din33466(uphill, downhill, length))))
-print("SAC: " + str(datetime.timedelta(seconds=sac(uphill, length))))
-print("Our Model: " + str(datetime.timedelta(seconds=time)))
+demo_input = [[zip_code_demo, km_demo, first_registration_demo]]
+demo_df = pd.DataFrame(columns=['zip', 'km', 'first_registration'], data=demo_input)
+demo_output = gbr.predict(demo_df)
+predicted_price = round(demo_output[0], 2)
 
-
-# Save To Disk
-import pickle
-
-# save the classifier
-with open('GradientBoostingRegressor.pkl', 'wb') as fid:
-    pickle.dump(gbr, fid)    
-
-# load it again
-with open('GradientBoostingRegressor.pkl', 'rb') as fid:
-    gbr_loaded = pickle.load(fid)
+print("Predicted Price: " + str(predicted_price))
