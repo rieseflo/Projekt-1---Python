@@ -1,21 +1,20 @@
-# crawl gpx spider, limit to 10 and store output in json line format file
 # new terminal, cd spider
-# scrapy crawl tutti -o file.jl
+# scrapy crawl tutti -o file.json
 
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from ..items import SpiderItem
 from scrapy.loader import ItemLoader
-import re
 
 class MarketplaceSpider(CrawlSpider):
     name = 'tutti'
-    start_urls = ['https://www.tutti.ch/de/q/motorraeder/Ak8CrbW90b3JjeWNsZXOUwMDAwA?sorting=newest']
+    allowed_domains = ['tutti.ch']
+    start_urls = ["https://www.tutti.ch/de/q/motorraeder/Ak8CrbW90b3JjeWNsZXOUwMDAwA?sorting=newest&page=1"]
 
     rules = (
-        Rule(LinkExtractor(allow=(r'page=\d+',)), follow=True),
-        Rule(LinkExtractor(allow=(r'fahrzeuge/motorraeder',)), callback='parse_item'),
+        Rule(LinkExtractor(allow=r'fahrzeuge/motorraeder'), callback='parse_item', follow=True),  
+        Rule(LinkExtractor(allow=r'page=\d+'), follow=True),
     )
 
     def parse_item(self, response):
@@ -26,5 +25,5 @@ class MarketplaceSpider(CrawlSpider):
         l.add_xpath("zip", '//dt[contains(span/@class, "ecqlgla2") and contains(span/text(), "PLZ")]/following-sibling::dd/span[contains(@class, "ecqlgla1")]')
         l.add_xpath("km", '//dt[contains(span/@class, "ecqlgla2") and contains(span/text(), "Kilometerstand")]/following-sibling::dd/span[contains(@class, "ecqlgla1")]')
         l.add_xpath("first_registration", '//dt[contains(span/@class, "ecqlgla2") and contains(span/text(), "Erstzulassung")]/following-sibling::dd/span[contains(@class, "ecqlgla1")]')
-        
-        return l.load_item()
+                
+        yield l.load_item()
