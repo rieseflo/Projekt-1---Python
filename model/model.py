@@ -76,25 +76,23 @@ x = df.drop(columns=['price', 'title', 'description'])  # Dropping column to use
 # Split the data into training and testing sets
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
 
-# Baseline Linear Regression
-lr = LinearRegression()
-lr.fit(x_train, y_train)
-y_pred_lr = lr.predict(x_test)
-r2_lr = r2_score(y_test, y_pred_lr)
-mse_lr = mean_squared_error(y_test, y_pred_lr)
+from sklearn.ensemble import RandomForestRegressor
 
-print("Linear Regression:")
-print("r2:\t{}\nMSE: \t{}".format(r2_lr, mse_lr))
+# Instantiate the model
+rf_regressor = RandomForestRegressor(n_estimators=100, random_state=42)
 
-# Gradient Boosting Regressor
-gbr = GradientBoostingRegressor(n_estimators=50, random_state=9000)
-gbr.fit(x_train, y_train)
-y_pred_gbr = gbr.predict(x_test)
-r2_gbr = r2_score(y_test, y_pred_gbr)
-mse_gbr = mean_squared_error(y_test, y_pred_gbr)
+# Fit the model
+rf_regressor.fit(x_train, y_train)
 
-print("\nGradient Boosting Regressor:")
-print("r2:\t{}\nMSE: \t{}".format(r2_gbr, mse_gbr))
+# Predict on the test set
+y_pred_rf = rf_regressor.predict(x_test)
+
+# Evaluate the model
+r2_rf = r2_score(y_test, y_pred_rf)
+mse_rf = mean_squared_error(y_test, y_pred_rf)
+
+print("Random Forest Regressor:")
+print("r2:\t{}\nMSE: \t{}".format(r2_rf, mse_rf))
 
 print("*** DEMO ***")
 zip_code_demo = 9524
@@ -107,7 +105,7 @@ print("First Registration Year: " + str(first_registration_demo))
 
 demo_input = [[zip_code_demo, km_demo, first_registration_demo]]
 demo_df = pd.DataFrame(columns=['zip', 'km', 'first_registration'], data=demo_input)
-demo_output = gbr.predict(demo_df)
+demo_output = rf_regressor.predict(demo_df)
 predicted_price = round(demo_output[0], 2)
 
 print("Predicted Price: " + str(predicted_price))
