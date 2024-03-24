@@ -1,6 +1,6 @@
 # new terminal
 # cd spider/downloads
-# python .\mongo_import.py -c tracks -i ../file.jl -u 'mongodb+srv://<user>:<password>@tuttimongodbcluster.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
+# python .\mongo_import.py -c tracks -i ../file.jl -u 'mongodb+srv://<user>:<password>@carpricemongodb.mongocluster.cosmos.azure.com/?tls=true&authMechanism=SCRAM-SHA-256&retrywrites=false&maxIdleTimeMS=120000'
 
 import argparse
 import json
@@ -16,13 +16,18 @@ from pathlib import Path
 def to_document(base_dir, item):
     try:
         doc = {
-            "title": item.get("title", ""),
-            "description": item.get("description", ""),
             "price": item.get("price", ""),
             "zip": item.get("zip", ""),
             "km": item.get("km", ""),
             "first_registration": item.get("first_registration", ""),
-            "difficulty": ""  # Since there's no difficulty field in motorcycles.py, set it to default value
+            "aufbau": item.get("aufbau", ""),
+            "marke": item.get("marke", ""),
+            "modell": item.get("modell", ""),
+            "türen": item.get("türen", ""),
+            "farbe": item.get("farbe", ""),
+            "treibstoff": item.get("treibstoff", ""),
+            "getriebeart": item.get("getriebeart", ""),
+            "leistung": item.get("leistung", ""),
         }
         return doc
             

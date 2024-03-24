@@ -14,14 +14,6 @@ def clean_price(text):
     return cleaned_text
 
 class SpiderItem(scrapy.Item):
-    title = scrapy.Field(
-        input_processor=MapCompose(remove_tags), 
-        output_processor=TakeFirst(),
-    )
-    description = scrapy.Field(
-        input_processor=MapCompose(remove_tags), 
-        output_processor=TakeFirst(),
-    )
     price = scrapy.Field(
         input_processor=MapCompose(remove_tags, clean_price), 
         output_processor=TakeFirst(),
@@ -35,6 +27,38 @@ class SpiderItem(scrapy.Item):
         output_processor=TakeFirst(),
     )
     first_registration = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    aufbau = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    marke = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    modell = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    türen = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    farbe = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    treibstoff = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    getriebeart = scrapy.Field(
+        input_processor=MapCompose(remove_tags), 
+        output_processor=TakeFirst(),
+    )
+    leistung = scrapy.Field(
         input_processor=MapCompose(remove_tags), 
         output_processor=TakeFirst(),
     )

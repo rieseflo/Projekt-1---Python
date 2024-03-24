@@ -1,4 +1,5 @@
-# python -m flask --debug --app service run (works also in PowerShell)
+# cd backend
+# python -m flask --debug --app service run
 
 import datetime
 import os
@@ -21,7 +22,7 @@ if 'AZURE_STORAGE_CONNECTION_STRING' in os.environ:
     for container in containers:
         existingContainerName = container['name']
         print("checking container " + existingContainerName)
-        if existingContainerName.startswith("hikeplanner-model"):
+        if existingContainerName.startswith("carprice-"):
             parts = existingContainerName.split("-")
             print(parts)
             suffix = 1
@@ -30,7 +31,7 @@ if 'AZURE_STORAGE_CONNECTION_STRING' in os.environ:
                 if (newSuffix > suffix):
                     suffix = newSuffix
 
-    container_client = blob_service_client.get_container_client("hikeplanner-model-" + str(suffix))
+    container_client = blob_service_client.get_container_client("carprice-" + str(suffix))
     blob_list = container_client.list_blobs()
     for blob in blob_list:
         print("\t" + blob.name)
@@ -52,35 +53,6 @@ file_path = Path(".", "../model/", "GradientBoostingRegressor.pkl")
 with open(file_path, 'rb') as fid:
     model = pickle.load(fid)
 
-print("*** Sample calculation with model ***")
-def din33466(uphill, downhill, distance):
-    km = distance / 1000.0
-    print(km)
-    vertical = downhill / 500.0 + uphill / 300.0
-    print(vertical)
-    horizontal = km / 4.0
-    print(horizontal)
-    return 3600.0 * (min(vertical, horizontal) / 2 + max(vertical, horizontal))
-
-def sac(uphill, downhill, distance):
-    km = distance / 1000.0
-    return 3600.0 * (uphill/400.0 + km /4.0)
-
-downhill = 300
-uphill = 700
-length = 10000
-max_elevation = 1200
-print("Downhill: " + str(downhill))
-print("Uphill: " + str(uphill))
-print("Length: " + str(length))
-demoinput = [[downhill,uphill,length,max_elevation]]
-demodf = pd.DataFrame(columns=['downhill', 'uphill', 'length_3d', 'max_elevation'], data=demoinput)
-demooutput = model.predict(demodf)
-time = demooutput[0]
-print("Our Model: " + str(datetime.timedelta(seconds=time)))
-print("DIN33466: " + str(datetime.timedelta(seconds=din33466(uphill=uphill, downhill=downhill, distance=length))))
-print("SAC: " + str(datetime.timedelta(seconds=sac(uphill=uphill, downhill=downhill, distance=length))))
-
 print("*** Init Flask App ***")
 app = Flask(__name__)
 cors = CORS(app)
@@ -92,17 +64,27 @@ def indexPage():
 
 @app.route("/api/predict")
 def hello_world():
-    downhill = request.args.get('downhill', default = 0, type = int)
-    uphill = request.args.get('uphill', default = 0, type = int)
-    length = request.args.get('length', default = 0, type = int)
-
-    demoinput = [[downhill,uphill,length,0]]
-    demodf = pd.DataFrame(columns=['downhill', 'uphill', 'length_3d', 'max_elevation'], data=demoinput)
-    demooutput = model.predict(demodf)
-    time = demooutput[0]
-
-    return jsonify({
-        'time': str(datetime.timedelta(seconds=time)),
-        'din33466': str(datetime.timedelta(seconds=din33466(uphill=uphill, downhill=downhill, distance=length))),
-        'sac': str(datetime.timedelta(seconds=sac(uphill=uphill, downhill=downhill, distance=length)))
-        })
+    # Retrieve parameters from the request query string
+    zip_code = request.args.get('zip_code', default=-1, type=int)
+    km = request.args.get('km', default=-1, type=int)
+    first_registration = request.args.get('first_registration', default=-1, type=int)
+    aufbau = request.args.get('aufbau', default=-1, type=int)  # Update with feature names and types
+    marke = request.args.get('marke', default=-1, type=int)    # Update with feature names and types
+    modell = request.args.get('modell', default=-1, type=int)  # Update with feature names and types
+    türen = request.args.get('türen', default=-1, type=int)    # Update with feature names and types
+    farbe = request.args.get('farbe', default=-1, type=int)    # Update with feature names and types
+    treibstoff = request.args.get('treibstoff', default=-1, type=int)  # Update with feature names and types
+    getriebeart = request.args.get('getriebeart', default=-1, type=int)  # Update with feature names and types
+    leistung = request.args.get('leistung', default=-1, type=int)  # Update with feature names and types
+    
+    # Create input data for prediction
+    demo_input = [[zip_code, km, first_registration, aufbau, marke, modell, türen, farbe, treibstoff, getriebeart, leistung]]
+    demo_df = pd.DataFrame(columns=['zip', 'km', 'first_registration', 'aufbau', 'marke', 'modell', 'türen', 'farbe', 'treibstoff', 'getriebeart', 'leistung'], data=demo_input)
+    
+    # Predict car price using the loaded model
+    predicted_price = model.predict(demo_df)
+    
+    # Prepare response
+    response = {'Price': predicted_price[0]}
+    
+    return jsonify(response)

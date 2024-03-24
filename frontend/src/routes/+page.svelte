@@ -5,28 +5,36 @@
         url = "http://localhost:5000";
     }
 
-    let count = 0;
-
-    function increment() {
-        count++;
-    }
-
-    let downhill = 0;
-    let uphill = 0;
-    let length = 0;
+    let zip = 0;
+    let km = 0;
+    let first_registration = 0;
+    let aufbau = 0;
+    let marke = 0;
+    let modell = 0;
+    let türen = 0;
+    let farbe = 0;
+    let treibstoff = 0;
+    let getriebeart = 0;
+    let leistung = 0;
 
     let prediction = "n.a.";
-    let din33466 = "n.a.";
-    let sac = "n.a.";
 
     async function predict() {
         let result = await fetch(
             url +
                 "/api/predict?" +
                 new URLSearchParams({
-                    downhill: downhill,
-                    uphill: uphill,
-                    length: length,
+                    zip_code: zip,
+                    km: km,
+                    first_registration: first_registration,
+                    aufbau: aufbau,
+                    marke: marke,
+                    modell: modell,
+                    türen: türen,
+                    farbe: farbe,
+                    treibstoff: treibstoff,
+                    getriebeart: getriebeart,
+                    leistung: leistung
                 }),
             {
                 method: "GET",
@@ -34,57 +42,84 @@
         );
         let data = await result.json();
         console.log(data);
-        prediction = data.time;
-        din33466 = data.din33466;
-        sac = data.sac;
+        prediction = data.Price;
     }
 </script>
 
-<h1>HikePlanner</h1>
-<p>
-    Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
-</p>
-
-<button on:click={increment}>
-    Clicked {count}
-    {count === 1 ? "time" : "times"}
-</button>
+<h1>Car Price Prediction</h1>
 
 <p>
-    <strong>Abwärts [m]</strong>
-    <label>
-        <input type="number" bind:value={downhill} min="0" max="10000" />
-        <input type="range" bind:value={downhill} min="0" max="10000" />
-    </label>
+    <strong>Zip:</strong>
+    <input type="number" bind:value={zip} />
 </p>
 
 <p>
-    <strong>Aufwärts [m]</strong>
-    <label>
-        <input type="number" bind:value={uphill} min="0" max="10000" />
-        <input type="range" bind:value={uphill} min="0" max="10000" />
-    </label>
+    <strong>Kilometers:</strong>
+    <input type="number" bind:value={km} />
 </p>
 
 <p>
-    <strong>Distanz [m]</strong>
-    <label>
-        <input type="number" bind:value={length} min="0" max="30000" />
-        <input type="range" bind:value={length} min="0" max="30000" />
-    </label>
+    <strong>First Registration Year:</strong>
+    <input type="number" bind:value={first_registration} />
+</p>
+
+<p>
+    <strong>Aufbau:</strong>
+    <input type="number" bind:value={aufbau} />
+</p>
+
+<p>
+    <strong>Marke:</strong>
+    <input type="number" bind:value={marke} />
+</p>
+
+<p>
+    <strong>Modell:</strong>
+    <input type="number" bind:value={modell} />
+</p>
+
+<p>
+    <strong>Türen:</strong>
+    <input type="number" bind:value={türen} />
+</p>
+
+<p>
+    <strong>Farbe:</strong>
+    <input type="number" bind:value={farbe} />
+</p>
+
+<p>
+    <strong>Treibstoff:</strong>
+    <input type="number" bind:value={treibstoff} />
+</p>
+
+<p>
+    <strong>Getriebeart:</strong>
+    <input type="number" bind:value={getriebeart} />
+</p>
+
+<p>
+    <strong>Leistung:</strong>
+    <input type="number" bind:value={leistung} />
 </p>
 
 <button on:click={predict}>Predict</button>
 
-<p></p>
-<table>
-    <tr>
-        <td>Dauer:</td><td>{prediction}</td>
-    </tr>
-    <tr>
-        <td>DIN33466:</td><td>{din33466}</td>
-    </tr>
-    <tr>
-        <td>SAC:</td><td>{sac}</td>
-    </tr>
-</table>
+<p>Predicted Price: {prediction}</p>
+
+<button on:click={() => {
+    // Clear input fields
+    zip = 0;
+    km = 0;
+    first_registration = 0;
+    aufbau = 0;
+    marke = 0;
+    modell = 0;
+    türen = 0;
+    farbe = 0;
+    treibstoff = 0;
+    getriebeart = 0;
+    leistung = 0;
+    // Clear prediction
+    prediction = "n.a.";
+}}>Clear</button>
