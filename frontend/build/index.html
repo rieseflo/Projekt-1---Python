@@ -1,44 +1,588 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="./favicon.png" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		
-		<link rel="modulepreload" href="./_app/immutable/entry/start.MhuHwd1o.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/entry.wUeTfkRq.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.zMJaRgub.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/app.LdwEzxIk.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/index.aVnu3b9f.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/0.IU5AeOT3.js">
-		<link rel="modulepreload" href="./_app/immutable/nodes/2.EpqYNhCB.js">
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents">  <h1 data-svelte-h="svelte-e3ww2p">Car Price Calculator</h1> <p data-svelte-h="svelte-a64301">Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p> <button>Clicked 0 times</button> <p><strong data-svelte-h="svelte-4z8nqm">Abwärts [m]</strong> <label><input type="number" min="0" max="10000" value="0"> <input type="range" min="0" max="10000" value="0"></label></p> <p><strong data-svelte-h="svelte-12bkxll">Aufwärts [m]</strong> <label><input type="number" min="0" max="10000" value="0"> <input type="range" min="0" max="10000" value="0"></label></p> <p><strong data-svelte-h="svelte-gkflnq">Distanz [m]</strong> <label><input type="number" min="0" max="30000" value="0"> <input type="range" min="0" max="30000" value="0"></label></p> <button data-svelte-h="svelte-7qel70">Predict</button> <p></p> <table><tr><td data-svelte-h="svelte-1qjxbrr">Dauer:</td><td>n.a.</td></tr> <tr><td data-svelte-h="svelte-cb1clj">DIN33466:</td><td>n.a.</td></tr> <tr><td data-svelte-h="svelte-orpm3r">SAC:</td><td>n.a.</td></tr></table> 
-			
-			<script>
-				{
-					__sveltekit_1jpd85b = {
-						base: new URL(".", location).pathname.slice(0, -1)
-					};
 
-					const element = document.currentScript.parentElement;
+<head>
+	<meta charset="utf-8" />
+	<link rel="icon" href="./favicon.png" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-					const data = [null,null];
+	<link rel="modulepreload" href="./_app/immutable/entry/start.MhuHwd1o.js">
+	<link rel="modulepreload" href="./_app/immutable/chunks/entry.wUeTfkRq.js">
+	<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.zMJaRgub.js">
+	<link rel="modulepreload" href="./_app/immutable/entry/app.LdwEzxIk.js">
+	<link rel="modulepreload" href="./_app/immutable/chunks/index.aVnu3b9f.js">
+	<link rel="modulepreload" href="./_app/immutable/nodes/0.IU5AeOT3.js">
+	<link rel="modulepreload" href="./_app/immutable/nodes/2.EpqYNhCB.js">
 
-					Promise.all([
-						import("./_app/immutable/entry/start.MhuHwd1o.js"),
-						import("./_app/immutable/entry/app.LdwEzxIk.js")
-					]).then(([kit, app]) => {
-						kit.start(app, element, {
-							node_ids: [0, 2],
-							data,
-							form: null,
-							error: null
-						});
-					});
-				}
-			</script>
+	<title>Verkaufspreis von Occasionsfahrzeugen vorhersagen</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			background-color: #f2f2f2;
+		}
+
+		.container {
+			background-color: #fff;
+			border-radius: 8px;
+			box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+			padding: 20px;
+			max-width: 400px;
+			margin: 20px auto;
+			text-align: center;
+		}
+
+		h1 {
+			margin-top: 0;
+			color: #333;
+		}
+
+		form {
+			display: grid;
+			gap: 10px;
+		}
+
+		label {
+			font-weight: bold;
+		}
+
+		input {
+			width: 100%;
+			padding: 8px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+
+		button {
+			background-color: #007bff;
+			color: #fff;
+			border: none;
+			border-radius: 4px;
+			padding: 10px 20px;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+
+		button:hover {
+			background-color: #0056b3;
+		}
+
+		#predictionResult {
+			margin-top: 20px;
+		}
+
+		#predictedPrice {
+			font-weight: bold;
+			color: #007bff;
+		}
+	</style>
+</head>
+
+<body>
+	
+	<script>
+
+		function predict() {
+			// Get values from input fields
+			let zip = document.getElementById("zip").value;
+			let km = document.getElementById("km").value;
+			let first_registration = document.getElementById("first_registration").value;
+			let aufbau = document.getElementById("aufbau").value;
+			let marke = document.getElementById("marke").value;
+			let modell = document.getElementById("modell").value;
+			let türen = document.getElementById("türen").value;
+			let farbe = document.getElementById("farbe").value;
+			let treibstoff = document.getElementById("treibstoff").value;
+			let getriebeart = document.getElementById("getriebeart").value;
+			let leistung = document.getElementById("leistung").value;
+
+			// Construct the URL with query parameters
+			let url = `/api/predict?zip_code=${zip}&km=${km}&first_registration=${first_registration}&aufbau_encoded=${aufbau}&marke=${marke}&modell=${modell}&türen=${türen}&farbe=${farbe}&treibstoff=${treibstoff}&getriebeart=${getriebeart}&leistung=${leistung}`;
+
+			// Send GET request
+			fetch(url)
+				.then(response => response.json())
+				.then(data => {
+					// Extracting the predicted price from the data
+					const predictedPrice = data.Price.toFixed(2);
+
+					document.getElementById("predictedPrice").textContent = predictedPrice;
+				})
+				.catch(error => {
+					// Handling any errors that occur during the fetch
+					console.error('Error fetching data:', error);
+				});
+		}
+
+		function resetValues() {
+			// Reset input fields by setting the values to their default values
+			document.getElementById("zip").value = 0;
+			document.getElementById("km").value = 0;
+			document.getElementById("first_registration").value = 0;
+			document.getElementById("aufbau").value = 5;
+			document.getElementById("marke").value = -1;
+			document.getElementById("modell").value = -1;
+			document.getElementById("türen").value = 0;
+			document.getElementById("farbe").value = -1;
+			document.getElementById("treibstoff").value = -1;
+			document.getElementById("getriebeart").value = -1;
+			document.getElementById("leistung").value = 0;
+
+			document.getElementById("predictedPrice").textContent = '0.00';
+		}
+
+    </script>
+
+	<div class="container">
+		<h1>Verkaufspreis von Occasionsfahrzeugen vorhersagen</h1>
+
+		<form id="predictionForm">
+			<label for="zip">Postleitzahl:</label>
+			<input type="number" id="zip" name="zip" value="0">
+
+			<label for="km">Kilometer:</label>
+			<input type="number" id="km" name="km" value="0">
+
+			<label for="first_registration">Erstzulassung (Jahr):</label>
+			<input type="number" id="first_registration" name="first_registration" value="0">
+
+			<label for="aufbau">Aufbau:</label>
+			<select id="aufbau" name="aufbau">
+				<option value="5">Other</option>
+				<option value="0">Cabriolet / Sport</option>
+				<option value="1">Coupé</option>
+				<option value="2">Kombi</option>
+				<option value="3">Limousine</option>
+				<option value="4">SUV</option>
+				<option value="6">Van / Kleinbus</option>
+			</select>
+
+			<label for="marke">Marke:</label>
+			<select id="marke" name="marke">
+				<option value="-1">Other</option>
+				<option value="0">Alfa Romeo</option>
+				<option value="1">Aston Martin</option>
+				<option value="2">Audi</option>
+				<option value="3">Austin</option>
+				<option value="4">BMW</option>
+				<option value="5">CUPRA</option>
+				<option value="6">Cadillac</option>
+				<option value="7">Chevrolet</option>
+				<option value="8">Chrysler</option>
+				<option value="9">Citroën</option>
+				<option value="10">DS AUTOMOBILES</option>
+				<option value="11">Dacia</option>
+				<option value="12">Daihatsu</option>
+				<option value="13">Dodge</option>
+				<option value="14">Fiat</option>
+				<option value="15">Ford</option>
+				<option value="16">Honda</option>
+				<option value="17">Hyundai</option>
+				<option value="18">Jaguar</option>
+				<option value="19">Jeep</option>
+				<option value="20">Kia</option>
+				<option value="21">Lada</option>
+				<option value="22">Lancia</option>
+				<option value="23">Land Rover</option>
+				<option value="24">Lexus</option>
+				<option value="25">Lotus</option>
+				<option value="26">MINI</option>
+				<option value="27">Maserati</option>
+				<option value="28">Mazda</option>
+				<option value="29">Mercedes-Benz</option>
+				<option value="30">Mini</option>
+				<option value="31">Mitsubishi</option>
+				<option value="32">Nissan</option>
+				<option value="33">Opel</option>
+				<option value="34">Peugeot</option>
+				<option value="35">Pontiac</option>
+				<option value="36">Porsche</option>
+				<option value="37">Renault</option>
+				<option value="38">Rover</option>
+				<option value="39">SEAT</option>
+				<option value="40">Saab</option>
+				<option value="41">Skoda</option>
+				<option value="42">Smart</option>
+				<option value="43">SsangYong</option>
+				<option value="44">Subaru</option>
+				<option value="45">Suzuki</option>
+				<option value="46">Tesla</option>
+				<option value="47">Toyota</option>
+				<option value="48">Volkswagen</option>
+				<option value="49">Volvo</option>
+			</select>
+
+			<label for="modell">Modell:</label>
+			<select id="modell" name="modell">
+				<option value="-1">Other</option>
+				<option value="0">1-serien</option>
+				<option value="1">107</option>
+				<option value="2">108</option>
+				<option value="3">1100</option>
+				<option value="4">116</option>
+				<option value="5">118</option>
+				<option value="6">120</option>
+				<option value="7">124</option>
+				<option value="8">125</option>
+				<option value="9">135</option>
+				<option value="10">147</option>
+				<option value="11">156</option>
+				<option value="12">159</option>
+				<option value="13">164</option>
+				<option value="14">180</option>
+				<option value="15">190</option>
+				<option value="16">1serien</option>
+				<option value="17">2</option>
+				<option value="18">200</option>
+				<option value="19">2008</option>
+				<option value="20">206</option>
+				<option value="21">207</option>
+				<option value="22">208</option>
+				<option value="23">218</option>
+				<option value="24">220</option>
+				<option value="25">240</option>
+				<option value="26">25</option>
+				<option value="27">3</option>
+				<option value="28">3-serien</option>
+				<option value="29">300</option>
+				<option value="30">300-serien</option>
+				<option value="31">3008</option>
+				<option value="32">306</option>
+				<option value="33">307</option>
+				<option value="34">308</option>
+				<option value="35">309</option>
+				<option value="36">316</option>
+				<option value="37">318</option>
+				<option value="38">320</option>
+				<option value="39">323</option>
+				<option value="40">325</option>
+				<option value="41">328</option>
+				<option value="42">33</option>
+				<option value="43">330</option>
+				<option value="44">335</option>
+				<option value="45">350</option>
+				<option value="46">350Z</option>
+				<option value="47">370Z</option>
+				<option value="48">3serien</option>
+				<option value="49">4008</option>
+				<option value="50">406</option>
+				<option value="51">407</option>
+				<option value="52">420</option>
+				<option value="53">435</option>
+				<option value="54">5</option>
+				<option value="55">5-serien</option>
+				<option value="56">500</option>
+				<option value="57">5008</option>
+				<option value="58">500L</option>
+				<option value="59">500X</option>
+				<option value="60">508</option>
+				<option value="61">520</option>
+				<option value="62">523</option>
+				<option value="63">525</option>
+				<option value="64">528</option>
+				<option value="65">530</option>
+				<option value="66">535</option>
+				<option value="67">540</option>
+				<option value="68">550</option>
+				<option value="69">5serien</option>
+				<option value="70">6</option>
+				<option value="71">600</option>
+				<option value="72">645</option>
+				<option value="73">695 ABARTH</option>
+				<option value="74">6serien</option>
+				<option value="75">730</option>
+				<option value="76">75</option>
+				<option value="77">750</option>
+				<option value="78">780Bertone</option>
+				<option value="79">7serien</option>
+				<option value="80">80</option>
+				<option value="81">807</option>
+				<option value="82">9-3</option>
+				<option value="83">90</option>
+				<option value="84">900</option>
+				<option value="85">9000</option>
+				<option value="86">911</option>
+				<option value="87">93</option>
+				<option value="88">940</option>
+				<option value="89">95</option>
+				<option value="90">960</option>
+				<option value="91">A 250</option>
+				<option value="92">A-CLASS</option>
+				<option value="93">A1</option>
+				<option value="94">A3</option>
+				<option value="95">A4</option>
+				<option value="96">A5</option>
+				<option value="97">A6</option>
+				<option value="98">A7</option>
+				<option value="99">A8</option>
+				<option value="100">ACLASS</option>
+				<option value="101">ADAM</option>
+				<option value="102">AMG</option>
+				<option value="103">ASX</option>
+				<option value="104">ATECA</option>
+				<option value="105">Accent</option>
+				<option value="106">Accord</option>
+				<option value="107">Agila</option>
+				<option value="108">Alfetta</option>
+				<option value="109">Alhambra</option>
+				<option value="110">Altea</option>
+				<option value="111">AlteaXL</option>
+				<option value="112">Alto</option>
+				<option value="113">Amarok</option>
+				<option value="114">Amazon</option>
+				<option value="115">Antara</option>
+				<option value="116">Astra</option>
+				<option value="117">Atos</option>
+				<option value="118">Auris</option>
+				<option value="119">Avensis</option>
+				<option value="120">Aveo</option>
+				<option value="121">Aygo</option>
+				<option value="122">B-CLASS</option>
+				<option value="123">B-MAX</option>
+				<option value="124">B250</option>
+				<option value="125">Baleno</option>
+				<option value="126">Berlingo</option>
+				<option value="127">Barchetta</option>
+				<option value="128">Beetle</option>
+				<option value="129">Berlingo</option>
+				<option value="130">Bipper</option>
+				<option value="131">Biturbo</option>
+				<option value="132">Bora</option>
+				<option value="133">Boxer</option>
+				<option value="134">Boxster</option>
+				<option value="135">Bravo</option>
+				<option value="136">C1</option>
+				<option value="137">C-HR</option>
+				<option value="138">C3</option>
+				<option value="139">C30</option>
+				<option value="140">C4</option>
+				<option value="141">C5</option>
+				<option value="142">C70</option>
+				<option value="143">C8</option>
+				<option value="144">CL</option>
+				<option value="145">CABRIO</option>
+				<option value="146">CAPTUR</option>
+				<option value="147">CCLASS</option>
+				<option value="148">CJ</option>
+				<option value="149">CLA 250</option>
+				<option value="150">CLS</option>
+				<option value="151">CLK</option>
+				<option value="152">CLS</option>
+				<option value="153">CL</option>
+				<option value="154">CMAX</option>
+				<option value="155">COUNTRYMAN</option>
+				<option value="156">COUPÉ</option>
+				<option value="157">CR-V</option>
+				<option value="158">CRV</option>
+				<option value="159">CRX</option>
+				<option value="160">CT</option>
+				<option value="161">CTS</option>
+				<option value="162">CX-7</option>
+				<option value="163">CX7</option>
+				<option value="164">Caddy</option>
+				<option value="165">Caliber</option>
+				<option value="166">Camaro</option>
+				<option value="167">Caprice</option>
+				<option value="168">Captiva</option>
+				<option value="169">Carens</option>
+				<option value="170">Carisma</option>
+				<option value="171">Carnival</option>
+				<option value="172">Cayenne</option>
+				<option value="173">Cayman</option>
+				<option value="174">Cee'd</option>
+				<option value="175">Ceed</option>
+				<option value="176">Celica</option>
+				<option value="177">Cerato</option>
+				<option value="178">Challenger</option>
+				<option value="179">Cherokee</option>
+				<option value="180">Citan</option>
+				<option value="181">Civic</option>
+				<option value="182">Clio</option>
+				<option value="183">Clubman</option>
+				<option value="184">Colt</option>
+				<option value="185">Combo</option>
+				<option value="186">Compass</option>
+				<option value="187">Cooper</option>
+				<option value="188">CooperS</option>
+				<option value="189">Cordoba</option>
+				<option value="190">Corolla</option>
+				<option value="191">CorolVerso</option>
+				<option value="192">Corsa</option>
+				<option value="193">Corvette</option>
+				<option value="194">Countryman</option>
+				<option value="195">Coupe</option>
+				<option value="196">Croma</option>
+				<option value="197">Crossfire</option>
+				<option value="198">Cruze</option>
+				<option value="199">DISCOVERY SPORT</option>
+				<option value="200">DOKKER</option>
+				<option value="201">DS3</option>
+				<option value="202">DS4</option>
+				<option value="203">DS5</option>
+				<option value="204">Db9</option>
+				<option value="205">Defender</option>
+				<option value="206">Delta</option>
+				<option value="207">Demio</option>
+				<option value="208">Discovery</option>
+				<option value="209">Ducato</option>
+				<option value="210">Durango</option>
+				<option value="211">Duster</option>
+				<option value="212">E-CLASS</option>
+				<option value="213">ECLASS</option>
+				<option value="214">EDGE</option>
+				<option value="215">Eos</option>
+				<option value="216">Epica</option>
+				<option value="217">Escalade</option>
+				<option value="218">Espace</option>
+				<option value="219">Esprit</option>
+				<option value="220">Evoque</option>
+				<option value="221">Exeo</option>
+				<option value="222">Expert</option>
+				<option value="223">Explorer</option>
+				<option value="224">F-PACE</option>
+				<option value="225">FORMENTOR</option>
+				<option value="226">FRV</option>
+				<option value="227">Fabia</option>
+				<option value="228">Feroza</option>
+				<option value="229">Fiesta</option>
+				<option value="230">Firebird</option>
+				<option value="231">Flavia</option>
+				<option value="232">Focus</option>
+				<option value="233">Forester</option>
+				<option value="234">Forfour</option>
+				<option value="235">Fortwo</option>
+				<option value="236">Fox</option>
+				<option value="237">Freelander</option>
+				<option value="238">Freemont</option>
+				<option value="239">Fusion</option>
+				<option value="240">G-CLASS</option>
+				<option value="241">GCLASS</option>
+				<option value="242">GL</option>
+				<option value="243">GLC 250</option>
+				<option value="244">GT</option>
+				<option value="245">GT86</option>
+				<option value="246">GTI</option>
+				<option value="247">Galant</option>
+				<option value="248">Galaxie</option>
+				<option value="249">Galaxy</option>
+				<option value="250">Getz</option>
+				<option value="251">Ghibli</option>
+				<option value="252">Giulietta</option>
+				<option value="253">Golf</option>
+				<option value="254">Grand Cherokee</option>
+				<option value="255">GrandCherokee</option>
+				<option value="256">GrandePunto</option>
+				<option value="257">H1</option>
+				<option value="258">Hiace</option>
+				<option value="259">Hilux</option>
+				<option value="260">I10</option>
+				<option value="261">I20</option>
+				<option value="262">I30</option>
+				<option value="263">I40</option>
+				<option value="264">IQ</option>
+				<option value="265">IS</option>
+				<option value="266">Ibiza</option>
+				<option value="267">Ignis</option>
+				<option value="268">Impreza</option>
+				<option value="269">Insignia</option>
+				<option value="270">Ix35</option>
+				<option value="271">Ix55</option>
+				<option value="272">JCW</option>
+				<option value="273">Jazz</option>
+				<option value="274">Jetta</option>
+				<option value="275">Jimny</option>
+				<option value="276">Juke</option>
+				<option value="277">Jumpy</option>
+				<option value="278">Justy</option>
+				<option value="279">KADJAR</option>
+				<option value="280">KAMIQ</option>
+				<option value="281">KODIAQ</option>
+				<option value="282">Ka</option>
+				<option value="283">Kalos</option>
+				<option value="284">Kangoo</option>
+				<option value="285">Koleos</option>
+				<option value="286">Korando</option>
+				<option value="287">Kuga</option>
+				<option value="288">L200</option>
+				<option value="289">L300</option>
+				<option value="290">Lacetti</option>
+				<option value="291">Laguna</option>
+				<option value="292">Lancer</option>
+				<option value="293">LandCruiserserien</option>
+				<option value="294">LeBaron</option>
+				<option value="295">Leaf</option>
+				<option value="296">Legacy/Outback</option>
+				<option value="297">LegacyOutback</option>
+				<option value="298">Leon</option>
+				<option value="299">Lodgy</option>
+				<option value="300">Logo</option>
+				<option value="301">Logan</option>
+				<option value="302">Lupo</option>
+				<option value="303">M</option>
+				<option value="304">M235</option>
+				<option value="305">M5</option>
+				<option value="306">M550</option>
+				<option value="307">M6</option>
+				<option value="308">MINI</option>
+				<option value="309">MKII</option>
+				<option value="310">ML</option>
+				<option value="311">MODEL 3</option>
+				<option value="312">MR2</option>
+				<option value="313">MX-5</option>
+				<option value="314">MX3</option>
+				<option value="315">MX5</option>
+				<option value="316">Master</option>
+				<option value="317">Matiz</option>
+				<option value="318">M</option>
+			</select>
+
+			<label for="türen">Anzahl Türen:</label>
+			<input type="number" id="türen" name="türen" value="0">
+
+			<label for="farbe">Farbe:</label>
+			<select id="farbe" name="farbe">
+				<option value="-1">Other</option>
+				<option value="0">Blau</option>
+				<option value="1">Braun</option>
+				<option value="2">Gelb</option>
+				<option value="3">Grau</option>
+				<option value="4">Grün</option>
+				<option value="5">Rot</option>
+				<option value="6">Schwarz</option>
+				<option value="7">Silber</option>
+				<option value="8">Sonstiges</option>
+				<option value="9">Weiss</option>
+			</select>
+
+			<label for="treibstoff">Treibstoff:</label>
+			<select id="treibstoff" name="treibstoff">
+				<option value="-1">Other</option>
+				<option value="0">Benzin</option>
+				<option value="1">Diesel</option>
+				<option value="2">Eco / Hybrid</option>
+			</select>
+
+			<label for="getriebeart">Getriebeart:</label>
+			<select id="getriebeart" name="getriebeart">
+				<option value="-1">Other</option>
+				<option value="0">Automat</option>
+				<option value="1">Schaltgetriebe</option>
+			</select>
+
+			<label for="leistung">Lesitung in PS:</label>
+			<input type="number" id="leistung" name="leistung" value="0">
+
+			<button type="button" onclick="predict()">Preis erhalten</button>
+			<button type="button" onclick="resetValues()">Werte zurücksetzen</button>
+		</form>
+
+		<div id="predictionResult">
+			<p>Preis (Schätzung): <span id="predictedPrice">0.00</span></p>
 		</div>
-	</body>
+	</div>
+
+</body>
+
 </html>

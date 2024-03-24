@@ -63,28 +63,29 @@ def indexPage():
      return send_file("../frontend/build/index.html")  
 
 @app.route("/api/predict")
-def hello_world():
+def predict():
     # Retrieve parameters from the request query string
     zip_code = request.args.get('zip_code', default=-1, type=int)
     km = request.args.get('km', default=-1, type=int)
     first_registration = request.args.get('first_registration', default=-1, type=int)
-    aufbau = request.args.get('aufbau', default=-1, type=int)  # Update with feature names and types
-    marke = request.args.get('marke', default=-1, type=int)    # Update with feature names and types
-    modell = request.args.get('modell', default=-1, type=int)  # Update with feature names and types
-    türen = request.args.get('türen', default=-1, type=int)    # Update with feature names and types
-    farbe = request.args.get('farbe', default=-1, type=int)    # Update with feature names and types
-    treibstoff = request.args.get('treibstoff', default=-1, type=int)  # Update with feature names and types
-    getriebeart = request.args.get('getriebeart', default=-1, type=int)  # Update with feature names and types
-    leistung = request.args.get('leistung', default=-1, type=int)  # Update with feature names and types
+    aufbau = request.args.get('aufbau', default=-1, type=int) 
+    marke = request.args.get('marke', default=-1, type=int)   
+    modell = request.args.get('modell', default=-1, type=int) 
+    türen = request.args.get('türen', default=-1, type=int)    
+    farbe = request.args.get('farbe', default=-1, type=int)    
+    treibstoff = request.args.get('treibstoff', default=-1, type=int) 
+    getriebeart = request.args.get('getriebeart', default=-1, type=int)  
+    leistung = request.args.get('leistung', default=-1, type=int)  
     
     # Create input data for prediction
-    demo_input = [[zip_code, km, first_registration, aufbau, marke, modell, türen, farbe, treibstoff, getriebeart, leistung]]
-    demo_df = pd.DataFrame(columns=['zip', 'km', 'first_registration', 'aufbau', 'marke', 'modell', 'türen', 'farbe', 'treibstoff', 'getriebeart', 'leistung'], data=demo_input)
+    input_data = [[zip_code, km, first_registration, türen, leistung, aufbau, marke, modell, farbe, treibstoff, getriebeart]]
+    df = pd.DataFrame(columns=['zip', 'km', 'first_registration', 'türen', 'leistung', 'aufbau_encoded', 'marke_encoded', 'modell_encoded', 'farbe_encoded', 'treibstoff_encoded', 'getriebeart_encoded'], data=input_data)
     
     # Predict car price using the loaded model
-    predicted_price = model.predict(demo_df)
+    predicted_price = model.predict(df)
     
     # Prepare response
     response = {'Price': predicted_price[0]}
     
     return jsonify(response)
+
