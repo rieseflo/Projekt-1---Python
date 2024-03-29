@@ -1,6 +1,6 @@
 # Usage
 # docker build -t rieseflo/carprice .
-# docker run --name carprice -e AZURE_STORAGE_CONNECTION_STRING='***' -p 9001:5000 -d rieseflo/carprice
+# docker run --name carprice -e AZURE_STORAGE_CONNECTION_STRING='***' -p 9001:80 -d rieseflo/carprice
 # docker push rieseflo/carprice:latest
 
 FROM python:3.12.1
