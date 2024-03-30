@@ -13,7 +13,7 @@ SPIDER_MODULES = ["spider.spiders"]
 NEWSPIDER_MODULE = "spider.spiders"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/97.0'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
