@@ -19,10 +19,7 @@ jobs:
           cache: 'pip'
           
       - name: install python packages
-        run: |
-          pip install -r requirements.txt
-          export HTTP_PROXY="http://140.238.220.85:80"
-          export HTTPS_PROXY="http://140.238.220.85:80"
+        run: pip install -r requirements.txt
           
       - name: scrape tutti data 
         working-directory: ./spider

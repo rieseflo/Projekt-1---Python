@@ -34,5 +34,5 @@ class MarketplaceSpider(CrawlSpider):
         l.add_xpath("treibstoff", '//dt[span[contains(text(), "Treibstoff")]]/following-sibling::dd/span/text()')
         l.add_xpath("getriebeart", '//dt[span[contains(text(), "Getriebeart")]]/following-sibling::dd/span/text()')
         l.add_xpath("leistung", '//dt[span[contains(text(), "Leistung")]]/following-sibling::dd/span/text()')
-
+        
         yield l.load_item()
