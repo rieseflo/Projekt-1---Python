@@ -12,7 +12,7 @@ class MarketplaceSpider(CrawlSpider):
     name = 'tutti'
     start_urls = []
     base_url = "https://www.tutti.ch/de/q/autos/Ak8CkY2Fyc5TAwMDA?sorting=newest&page="
-    for page_num in range(1, 2):
+    for page_num in range(1, 101):
         url = base_url + str(page_num)
         start_urls.append(url)
 
